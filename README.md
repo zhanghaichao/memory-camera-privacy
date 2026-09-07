@@ -14,7 +14,9 @@ Edit both languages in `app/policy-content.ts`. The shared page is `app/policy.t
 
 Run `npm ci`, `npm run typecheck`, and `npm run build`. Commit source and the regenerated `docs/` directory, then push `main`. GitHub Pages publishes from `main:/docs`.
 
-The build renders React templates to ordinary HTML with correct language metadata, verifies all 13 sections and anchor targets, and copies the stylesheet and existing app icon. The public website does not require JavaScript and loads no external fonts or analytics. The Vinext development preview remains available using `npm run dev`.
+The build renders React templates to ordinary HTML with correct language metadata, verifies all 13 sections and anchor targets, and copies the stylesheet and existing app imagery. The public website does not require JavaScript and loads no external fonts or analytics. The Vinext development preview remains available using `npm run dev`.
+
+The visual introduction reuses the actual Android home screen (`public/images/app-home.png`) and the app’s built-in illustrative coastal photograph (`public/images/coast.png`). The image caption distinguishes the actual interface from illustrative artwork. Both are local assets; no external image requests are made. The original public policy addresses and all policy sections remain available, including a direct link to the policy above the introduction.
 
 ## Review basis
 

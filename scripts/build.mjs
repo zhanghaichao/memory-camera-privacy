@@ -4,10 +4,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import ts from 'typescript';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { createHash } from 'node:crypto';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const generated = path.join(root, '.static-build');
 const output = path.join(root, 'docs');
+const css = (await fs.readFile(path.join(root, 'app/globals.css'), 'utf8')).replace(/^@import 'tailwindcss';\s*/, '');
+const cssVersion = createHash('sha256').update(css).digest('hex').slice(0, 12);
 await fs.mkdir(generated, { recursive: true });
 await fs.mkdir(path.join(output, 'zh'), { recursive: true });
 for (const name of ['policy-content', 'policy']) {
@@ -35,7 +38,7 @@ for (const language of ['en', 'zh']) {
       createElement('link', { rel: 'alternate', hrefLang: 'en', href: 'https://zhanghaichao.github.io/memory-camera-privacy/' }),
       createElement('link', { rel: 'alternate', hrefLang: 'zh-CN', href: 'https://zhanghaichao.github.io/memory-camera-privacy/zh/' }),
       createElement('link', { rel: 'icon', href: '/memory-camera-privacy/icon.png' }),
-      createElement('link', { rel: 'stylesheet', href: '/memory-camera-privacy/style.css' })),
+      createElement('link', { rel: 'stylesheet', href: `/memory-camera-privacy/style.css?v=${cssVersion}` })),
     createElement('body', null, createElement(Policy, { language }))));
   if (!html.includes('seansheaton@gmail.com') || !html.includes('com.memorycamera.app')) throw new Error('Policy identity missing');
   if ((html.match(/class="policy-section"/g) || []).length !== 13) throw new Error('Policy sections missing');
@@ -44,8 +47,11 @@ for (const language of ['en', 'zh']) {
   for (const [, id] of html.matchAll(/href="#([^"]+)"/g)) if (!ids.has(id)) throw new Error(`Broken anchor: ${id}`);
   await fs.writeFile(path.join(output, language === 'zh' ? 'zh/index.html' : 'index.html'), html);
 }
-const css = (await fs.readFile(path.join(root, 'app/globals.css'), 'utf8')).replace(/^@import 'tailwindcss';\s*/, '');
 await fs.writeFile(path.join(output, 'style.css'), css);
 await fs.copyFile(path.join(root, 'public/icon.png'), path.join(output, 'icon.png'));
+await fs.mkdir(path.join(output, 'images'), { recursive: true });
+for (const image of ['app-home.png', 'coast.png']) {
+  await fs.copyFile(path.join(root, 'public/images', image), path.join(output, 'images', image));
+}
 await fs.writeFile(path.join(output, '.nojekyll'), '');
 console.log('Built and validated English and Chinese policies in docs/. No browser JavaScript or third-party assets.');
